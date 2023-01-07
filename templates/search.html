@@ -1,0 +1,26 @@
+<br><br>
+<form class="col s12">
+    <div class="row">
+        <div class="input-field col l4 s12">
+            <input type="text" id="from-input" class="autocomplete" autocomplete="off">
+            <label for="from-input">Откуда</label>
+        </div>
+        <div class="input-field col l4 s12">
+            <input type="text" id="to-input" class="autocomplete" autocomplete="off">
+            <label for="to-input">Куда</label>
+        </div>
+        <div class="input-field col l2 s12">
+            <input type="text" id="date-input" class="datepicker" autocomplete="off">
+            <label for="date-input">Когда</label>
+        </div>
+        <div class="input-field col l1 s6">
+            <button class="btn teal accent-4 waves-effect waves-light" type="submit"
+                name="action">Поиск</button>
+        </div>
+        {% if current_user.is_authenticated %}
+        <div class="input-field col l1 s6">
+            <a class="btn-floating waves-effect waves-light teal accent-4 tooltipped" data-tooltip="В избранное" onclick="add_to_fav()"><i class="material-icons">star</i></a>
+        </div>
+        {% endif %}
+    </div>
+</form>

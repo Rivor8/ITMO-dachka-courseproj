@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col s12 center-align">
+            <img src="static/images/лого2.png" class="center" alt="">
+        </div>
+        {% include "search.html" %}
+    </div>
+
+    {% if current_user.is_authenticated %}
+    <div class="row">
+        <h4 class="teal-text">Ваши избранные маршруты</h4>
+        <div id="favs_container">
+            <div class="collection" id="favs">
+                {% for item in favs%}
+                <a onclick="$('#from-input').val('{{ item.station_from }}');$('#to-input').val('{{ item.station_to }}');" class="collection-item">{{ item.station_from }}  &mdash; {{ item.station_to }} </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="row">
+        <h4 class="teal-text"><a href="/login">Авторизуйтесь</a> или <a href="/register">зарегистрируйтесь</a>, чтобы добавлять и просмотривать избранные маршруты</h4>
+    </div>
+    {% endif %}
+
+
+</div>
+{% endblock %}
