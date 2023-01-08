@@ -5,32 +5,43 @@
     
     {% include "search.html" %}
     
+    {% if rasp != [] %}
+    <script>
+        $('#from-input').val('{{ request.args.get("station_from") }}');
+        $('#to-input').val('{{ request.args.get("station_to") }}');
+        $('#date-input').val('{{ request.args.get("date_travel") }}');
+        
+    </script>
     <div class="row">
         <h3 class="teal-text">Расписание</h3>
 
-
         <ul class="collection">
+            {% for item in rasp%}
             <li class="collection-item avatar">
-                <i class="material-icons circle teal">train</i>
-                <span class="title">Девяткино <b>07:53</b> &mdash; Сосново <b>09:02</b></span>
-                <p>6511 Санкт-Петербург (Финляндский вокзал) — Приозерск</p>
+                {% if item['thread']['transport_type'] == 'suburban' %}
+                <i class="material-icons circle teal">directions_subway</i>
+                {% elif item['thread']['transport_type'] == 'bus' %}
+                <i class="material-icons circle orange">directions_bus</i>
+                {% else %}
+                <i class="material-icons circle red">priority_high</i>
+                {% endif %}
+                <span class="title">{{ item['from']['title'] }} <b>{{ item['departure'][11:16] }}</b> &mdash; {{ item['to']['title'] }} <b>{{ item['arrival'][11:16] }}</b></span>
+                <p>{{ item['thread']['number'] }} {{ item['thread']['title'] }}</p>
+                {% if item['thread']['express_type'] %}
                 <a href="#!" class="secondary-content"><span class="new badge red"
                         data-badge-caption="Скорый"></span></a>
+                {% endif %}
             </li>
-            <li class="collection-item avatar">
-                <i class="material-icons circle teal">train</i>
-                <span class="title">Девяткино <b>07:53</b> &mdash; Сосново <b>09:02</b></span>
-                <p>6511 Санкт-Петербург (Финляндский вокзал) — Приозерск</p>
-            </li>
-            <li class="collection-item avatar">
-                <i class="material-icons circle teal">train</i>
-                <span class="title">Девяткино <b>07:53</b> &mdash; Сосново <b>09:02</b></span>
-                <p>6511 Санкт-Петербург (Финляндский вокзал) — Приозерск</p>
-            </li>
+            {% endfor %}
         </ul>
 
-
     </div>
+
+    {% else %}
+    <div class="row">
+        <h3 class="teal-text">Что-то пошло не так...</h3>
+    </div>
+    {% endif %}
 
 </div>
 {% endblock %}

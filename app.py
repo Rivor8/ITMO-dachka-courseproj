@@ -1,4 +1,5 @@
 import os
+import json
 
 from flask import Flask, url_for, render_template, request
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
@@ -12,12 +13,14 @@ from data.stations import Station
 from data.announcements import Announcement
 from data.favs import Fav
 
+import requests
 from forms import *
-
 from urllib.parse import unquote
 
+from config import *
+
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'njfpFmfFYn7DFN8h6F0'
+app.config['SECRET_KEY'] = SECRET_KEY
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -39,10 +42,21 @@ def index():
         return render_template('index.html', title='Главная')
 
 
-@app.route('/schedule')
+@app.route('/schedule', methods=['GET', 'POST'])
 def schedule():
-    session = db_session.create_session()
-    return render_template('schedule.html', title='Расписание')
+    if request.method == "GET":
+        session = db_session.create_session()
+        ya_req = {
+            'from': session.query(Station).filter(Station.name == request.args.get("station_from"))[0].code,
+            'to': session.query(Station).filter(Station.name == request.args.get("station_to"))[0].code,
+            'apikey': YA_API_KEY,
+            'date': request.args.get("date_travel")
+        }
+        ya_resp = requests.get("https://api.rasp.yandex.net/v3.0/search/", params=ya_req)
+        print(json.loads(ya_resp.text), ya_resp.text, sep="\n\n\n")
+        if 'segments' in json.loads(ya_resp.text):
+            return render_template('schedule.html', title='Расписание', rasp=json.loads(ya_resp.text)['segments'])
+    return render_template('schedule.html', title='Расписание', rasp=[])
 
 @app.route('/addfav', methods=['GET', 'POST'])
 def addfav():
