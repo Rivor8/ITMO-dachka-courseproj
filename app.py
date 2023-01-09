@@ -44,19 +44,68 @@ def index():
 
 @app.route('/schedule', methods=['GET', 'POST'])
 def schedule():
+    session = db_session.create_session()
     if request.method == "GET":
-        session = db_session.create_session()
+        station_from = session.query(Station).filter(Station.name == request.args.get("station_from"))[0]
+        station_to = session.query(Station).filter(Station.name == request.args.get("station_to"))[0]
         ya_req = {
-            'from': session.query(Station).filter(Station.name == request.args.get("station_from"))[0].code,
-            'to': session.query(Station).filter(Station.name == request.args.get("station_to"))[0].code,
+            'from': station_from.code,
+            'to': station_to.code,
             'apikey': YA_API_KEY,
             'date': request.args.get("date_travel")
         }
         ya_resp = requests.get("https://api.rasp.yandex.net/v3.0/search/", params=ya_req)
-        print(json.loads(ya_resp.text), ya_resp.text, sep="\n\n\n")
+
+        advs_from = session.query(Announcement).filter(Announcement.station_id == station_from.id)
+        advs_to = session.query(Announcement).filter(Announcement.station_id == station_to.id)
+
         if 'segments' in json.loads(ya_resp.text):
-            return render_template('schedule.html', title='Расписание', rasp=json.loads(ya_resp.text)['segments'])
+            return render_template('schedule.html', title='Расписание', rasp=json.loads(ya_resp.text)['segments'], advs_from=advs_from, advs_to=advs_to)
     return render_template('schedule.html', title='Расписание', rasp=[])
+
+
+@app.route('/create_adv', methods=['GET', 'POST'])
+def create_adv():
+    session = db_session.create_session()
+    if request.method == "GET":
+        if request.args.get('station') != None:
+            return render_template('create_adv.html', title='Создать объявление', station=request.args.get('station'))
+        return render_template('create_adv.html', title='Создать объявление', station='')
+    elif request.method == "POST":
+        announcement = Announcement()
+        announcement.title = unquote(request.form.get("title"))
+        announcement.content = unquote(request.form.get("content"))
+        current_user.announcements.append(announcement)
+        current_station = session.query(Station).filter(Station.name == request.form.get("station"))
+        if current_station.count() > 0:
+            announcement.station_id = current_station[0].id
+            session.merge(current_user)
+            session.commit()
+            return render_template('message.html', title='Успех!', message='ok')
+        return render_template('message.html', title='Упс...', message='oops')
+    return render_template('create_adv.html', title='Создать объявление', station='')
+    
+
+@app.route('/my_advs')
+def my_advs():
+    session = db_session.create_session()
+    advs = session.query(Announcement).filter(Announcement.user == current_user)
+    return render_template('my_advs.html', title='Мои объявления', advs=advs)
+
+
+@app.route('/delete_adv/<int:id>', methods=['GET', 'POST'])
+@login_required
+def delete_adv(id):
+    session = db_session.create_session()
+    adv = session.query(Announcement).filter(Announcement.id == id, Announcement.user == current_user).first()
+    if adv:
+        session.delete(adv)
+        session.commit()
+    else:
+        abort(404)
+    return redirect('/my_advs')
+
+
 
 @app.route('/addfav', methods=['GET', 'POST'])
 def addfav():
@@ -70,7 +119,6 @@ def addfav():
         session.commit()
         return "ok"
     return abort(404)
-
 
 
 @app.route('/register', methods=['GET', 'POST'])

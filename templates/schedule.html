@@ -2,39 +2,82 @@
 {% block content %}
 {% include "nav.html" %}
 <div class="container">
-    
+
     {% include "search.html" %}
-    
+
     {% if rasp != [] %}
     <script>
         $('#from-input').val('{{ request.args.get("station_from") }}');
         $('#to-input').val('{{ request.args.get("station_to") }}');
         $('#date-input').val('{{ request.args.get("date_travel") }}');
-        
+
     </script>
     <div class="row">
-        <h3 class="teal-text">Расписание</h3>
+        <div class="col s12">
+            <ul class="tabs">
+                <li class="tab col s3"><a class="active" href="#table">Расписание</a></li>
+                <li class="tab col s3"><a href="#announcements_from">Объявления {{ request.args.get("station_from") }}</a></li>
+                <li class="tab col s3"><a href="#announcements_to">Объявления {{ request.args.get("station_to") }}</a></li>
+            </ul>
+        </div>
+        <div id="table" class="col s12">
+            <h3 class="teal-text">Расписание</h3>
 
-        <ul class="collection">
-            {% for item in rasp%}
-            <li class="collection-item avatar">
-                {% if item['thread']['transport_type'] == 'suburban' %}
-                <i class="material-icons circle teal">directions_subway</i>
-                {% elif item['thread']['transport_type'] == 'bus' %}
-                <i class="material-icons circle orange">directions_bus</i>
+            <ul class="collection">
+                {% for item in rasp%}
+                <li class="collection-item avatar">
+                    {% if item['thread']['transport_type'] == 'suburban' %}
+                    <i class="material-icons circle teal">directions_subway</i>
+                    {% elif item['thread']['transport_type'] == 'bus' %}
+                    <i class="material-icons circle orange">directions_bus</i>
+                    {% else %}
+                    <i class="material-icons circle red">priority_high</i>
+                    {% endif %}
+                    <span class="title">{{ item['from']['title'] }} <b>{{ item['departure'][11:16] }}</b> &mdash; {{
+                        item['to']['title'] }} <b>{{ item['arrival'][11:16] }}</b></span>
+                    <p>{{ item['thread']['number'] }} {{ item['thread']['title'] }}</p>
+                    {% if item['thread']['express_type'] %}
+                    <a href="#!" class="secondary-content"><span class="new badge red"
+                            data-badge-caption="Скорый"></span></a>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div id="announcements_from" class="col s12">
+            <div class="row">
+                {% for item in advs_from %}
+                <div class="col s12">
+                    <div class="card">
+                        <div class="card-content">
+                            <span class="card-title teal-text text-accent-4">{{ item.title }}</span>
+                            <p>{{ item.content }}</p>
+                            <p class="grey-text">Автор объявления: <b>{{ item.user.name }}</b>, дата публикации <b>{{ item.created_date.strftime('%d.%m.%Y %H:%M') }}</b></p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <a class="waves-effect waves-light btn" href="/create_adv?station={{ request.args.get('station_from') }}"><i class="material-icons right">add</i>Создать объявление</a>
+        </div>
+        <div id="announcements_to" class="col s12">
+            <div class="row">
+                {% for item in advs_to %}
+                <div class="col s12">
+                    <div class="card">
+                        <div class="card-content">
+                            <span class="card-title teal-text text-accent-4">{{ item.title }}</span>
+                            <p>{{ item.content }}</p>
+                            <p class="grey-text">Автор объявления: <b>{{ item.user.name }}</b>, дата публикации <b>{{ item.created_date.strftime('%d.%m.%Y %H:%M') }}</b></p>
+                        </div>
+                    </div>
+                </div>
                 {% else %}
-                <i class="material-icons circle red">priority_high</i>
-                {% endif %}
-                <span class="title">{{ item['from']['title'] }} <b>{{ item['departure'][11:16] }}</b> &mdash; {{ item['to']['title'] }} <b>{{ item['arrival'][11:16] }}</b></span>
-                <p>{{ item['thread']['number'] }} {{ item['thread']['title'] }}</p>
-                {% if item['thread']['express_type'] %}
-                <a href="#!" class="secondary-content"><span class="new badge red"
-                        data-badge-caption="Скорый"></span></a>
-                {% endif %}
-            </li>
-            {% endfor %}
-        </ul>
-
+                <h5 class="grey-text">Пользователи не разместили ни одного объявления</h5>
+                {% endfor %}
+            </div>
+            <a class="waves-effect waves-light btn" href="/create_adv?station={{ request.args.get('station_to') }}"><i class="material-icons right">add</i>Создать объявление</a>
+        </div>
     </div>
 
     {% else %}

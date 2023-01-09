@@ -3,7 +3,15 @@
         <a href="/" class="brand-logo center"><img src="static/images/лого_мал.png" width="30%" height="30%"
                 alt="Дачка"></a>
         <ul class="right hide-on-med-and-down">
-            <li><a href="" class=" orange-text text-accent-2"><b>вход</b></a></li>
+            <li><a href="/" class="teal-text text-accent-4">главная</a></li>
+            {% if current_user.is_authenticated %}
+            <li><a href="/my_advs" class="teal-text text-accent-4">мои объявления</a></li>
+            <li><a href="/create_adv" class="teal-text text-accent-4">создать объявление</a></li>
+            <li><a href="/logout" class="teal-text text-accent-4">выйти</a></li>
+            {% else %}
+            <li><a href="/login" class="teal-text text-accent-4">вход</a></li>
+            <li><a href="/register" class="teal-text text-accent-4">регистрация</a></li>
+            {% endif %}
         </ul>
     </div>
 </nav>

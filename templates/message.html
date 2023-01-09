@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "nav.html" %}
+<div class="container">
+    <div class="row">
+        {% if message == "ok" %}
+        <h4>Объявление успешно создано! <a href="/">Вернуться на главную страницу</a></h4>
+        {% else %}
+        <h4>Что-то пошло не так... <a href="/">Вернуться на главную страницу</a></h4>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
