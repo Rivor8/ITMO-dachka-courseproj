@@ -56,6 +56,8 @@
                         </div>
                     </div>
                 </div>
+                {% else %}
+                <h5 class="grey-text">Пользователи не разместили ни одного объявления</h5>
                 {% endfor %}
             </div>
             <a class="waves-effect waves-light btn" href="/create_adv?station={{ request.args.get('station_from') }}"><i class="material-icons right">add</i>Создать объявление</a>
