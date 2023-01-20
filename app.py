@@ -1,7 +1,7 @@
 import os
 import json
 
-from flask import Flask, url_for, render_template, request
+from flask import Flask, render_template, request
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
 from werkzeug.exceptions import abort
@@ -169,7 +169,7 @@ def logout():
 
 def main():
     db_session.global_init("db/db.sqlite")
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port)
 
 
